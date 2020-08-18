@@ -27,21 +27,29 @@ namespace ListMVC.Pages.BookList
             Book = new Book();
             if(id == null)
             {
-                return Page();
+                return Page(); //create
             }
 
-            Book = await _db.Book.FirstOrDefaultAsync(uint => uint.Id == id);
-            Book = await _db.Book.FindAsync(id);
+            Book = await _db.Book.FirstOrDefaultAsync(u => u.Id == id); //update
+            if(Book == null)
+            {
+                return NotFound();
+            }
+            return Page();
         }
 
         public async Task<IActionResult> OnPost()
         {
             if (ModelState.IsValid)
             {
-                var BookFromDb = await _db.Book.FindAsync(Book.Id);
-                BookFromDb.Name = Book.Name;
-                BookFromDb.ISBN = Book.ISBN;
-                BookFromDb.Author = Book.Author;
+                if (Book.Id == 0)
+                {
+                    _db.Book.Add(Book);
+                }
+                else
+                {
+                    _db.Book.Update(Book); //best for when updating all properties of a book
+                }
 
                 await _db.SaveChangesAsync();
 
